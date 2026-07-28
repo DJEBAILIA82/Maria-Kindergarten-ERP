@@ -13,25 +13,6 @@ State<SettingsPage> createState() => _SettingsPageState();
 class _SettingsPageState extends State<SettingsPage> {
 final UserService _userService = UserService();
 
-final List<_SectionAccount> _sectionAccounts = const [
-_SectionAccount(
-section: 'قسم الرضع',
-username: 'الرضع',
-),
-_SectionAccount(
-section: 'قسم قبل التمهيدي',
-username: 'قبل_التمهيدي',
-),
-_SectionAccount(
-section: 'قسم التمهيدي',
-username: 'التمهيدي',
-),
-_SectionAccount(
-section: 'قسم التحضيري',
-username: 'التحضيري',
-),
-];
-
 List<AppUser> _users = [];
 bool _isLoading = true;
 
@@ -47,30 +28,12 @@ _isLoading = true;
 });
 
 try {
-  for (final account in _sectionAccounts) {
-    final exists = _userService.getAllUsers().any(
-      (user) => user.username == account.username,
-    );
-
-    if (!exists) {
-      await _userService.addUser(
-        AppUser(
-          id: 'section_${account.username}',
-          fullName: account.section,
-          username: account.username,
-          password: '1234',
-          role: UserRole.teacher,
-          section: account.section,
-          isActive: true,
-        ),
-      );
-    }
-  }
+  final users = _userService.getAllUsers();
 
   if (!mounted) return;
 
   setState(() {
-    _users = _userService.getAllUsers();
+    _users = users;
     _isLoading = false;
   });
 } catch (error) {
@@ -89,15 +52,17 @@ try {
 
 }
 
-AppUser? _getSectionUser(_SectionAccount account) {
+AppUser? get _directorUser {
 for (final user in _users) {
-if (user.username == account.username) {
+if (user.role == UserRole.director) {
 return user;
 }
 }
-
 return null;
+}
 
+List<AppUser> get _teacherUsers {
+return _users.where((user) => user.role == UserRole.teacher).toList();
 }
 
 Future<void> _changePassword(AppUser user) async {
@@ -146,6 +111,7 @@ await showDialog<void>(
               ElevatedButton.icon(
                 onPressed: () async {
                   final password = passwordController.text.trim();
+                  final messenger = ScaffoldMessenger.of(context);
 
                   if (password.length < 4) {
                     ScaffoldMessenger.of(dialogContext).showSnackBar(
@@ -171,7 +137,7 @@ await showDialog<void>(
 
                   if (!mounted) return;
 
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  messenger.showSnackBar(
                     SnackBar(
                       content: Text(
                         'تم تغيير كلمة مرور ${user.section} بنجاح',
@@ -198,6 +164,199 @@ passwordController.dispose();
 
 }
 
+Future<void> _addUser() async {
+final fullNameController = TextEditingController();
+final usernameController = TextEditingController();
+final passwordController = TextEditingController();
+final sectionController = TextEditingController();
+UserRole selectedRole = UserRole.teacher;
+
+await showDialog<void>(
+  context: context,
+  builder: (dialogContext) {
+    bool hidePassword = true;
+
+    return StatefulBuilder(
+      builder: (context, setDialogState) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text('إضافة مستخدم جديد'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: fullNameController,
+                    decoration: const InputDecoration(
+                      labelText: 'الاسم الكامل',
+                      prefixIcon: Icon(Icons.person),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: usernameController,
+                    decoration: const InputDecoration(
+                      labelText: 'اسم المستخدم',
+                      prefixIcon: Icon(Icons.account_circle),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: hidePassword,
+                    decoration: InputDecoration(
+                      labelText: 'كلمة المرور',
+                      hintText: '4 أحرف أو أرقام على الأقل',
+                      prefixIcon: const Icon(Icons.lock),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            hidePassword = !hidePassword;
+                          });
+                        },
+                        icon: Icon(
+                          hidePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<UserRole>(
+                    key: ValueKey(selectedRole),
+                    initialValue: selectedRole,
+                    decoration: const InputDecoration(
+                      labelText: 'الدور',
+                      prefixIcon: Icon(Icons.badge),
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: UserRole.teacher,
+                        child: Text('معلمة'),
+                      ),
+                      DropdownMenuItem(
+                        value: UserRole.director,
+                        child: Text('مديرة'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setDialogState(() {
+                          selectedRole = value;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: sectionController,
+                    decoration: const InputDecoration(
+                      labelText: 'القسم',
+                      prefixIcon: Icon(Icons.groups),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                },
+                child: const Text('إلغاء'),
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final fullName = fullNameController.text.trim();
+                  final username = usernameController.text.trim();
+                  final password = passwordController.text.trim();
+                  final section = sectionController.text.trim();
+                  final messenger = ScaffoldMessenger.of(context);
+                  final dialogMessenger = ScaffoldMessenger.of(dialogContext);
+
+                  if (fullName.isEmpty || username.isEmpty) {
+                    dialogMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('يرجى إدخال الاسم واسم المستخدم'),
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (password.length < 4) {
+                    dialogMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'كلمة المرور يجب أن تكون 4 أحرف أو أرقام على الأقل',
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+
+                  try {
+                    await _userService.addUser(
+                      AppUser(
+                        id: '',
+                        fullName: fullName,
+                        username: username,
+                        password: password,
+                        role: selectedRole,
+                        section: section,
+                        isActive: true,
+                      ),
+                    );
+
+                    if (!dialogContext.mounted) return;
+
+                    Navigator.of(dialogContext).pop();
+
+                    await _loadAccounts();
+
+                    if (!mounted) return;
+
+                    messenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('تم إضافة المستخدم بنجاح'),
+                      ),
+                    );
+                  } catch (error) {
+                    dialogMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text('تعذّر إضافة المستخدم: $error'),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.save),
+                label: const Text('حفظ'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  },
+);
+
+fullNameController.dispose();
+usernameController.dispose();
+passwordController.dispose();
+sectionController.dispose();
+
+}
+
 Future<void> _toggleAccount(AppUser user) async {
 await _userService.setUserActive(
 userId: user.id,
@@ -220,13 +379,7 @@ ScaffoldMessenger.of(context).showSnackBar(
 
 }
 
-Widget _sectionCard(_SectionAccount account) {
-final user = _getSectionUser(account);
-
-if (user == null) {
-  return const SizedBox.shrink();
-}
-
+Widget _sectionCard(AppUser user) {
 final color = user.isActive ? Colors.blue : Colors.grey;
 
 return Card(
@@ -251,7 +404,7 @@ return Card(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                account.section,
+                user.section.isNotEmpty ? 'قسم ${user.section}' : user.fullName,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -259,7 +412,7 @@ return Card(
               ),
               const SizedBox(height: 4),
               Text(
-                'اسم المستخدم: ${account.username}',
+                'اسم المستخدم: ${user.username}',
                 style: const TextStyle(
                   fontSize: 13,
                   color: Colors.black54,
@@ -332,6 +485,11 @@ backgroundColor: Colors.grey.shade800,
 foregroundColor: Colors.white,
 actions: [
 IconButton(
+onPressed: _isLoading ? null : _addUser,
+icon: const Icon(Icons.person_add_alt_1),
+tooltip: 'إضافة مستخدم',
+),
+IconButton(
 onPressed: _isLoading ? null : _loadAccounts,
 icon: const Icon(Icons.refresh),
 tooltip: 'تحديث',
@@ -385,14 +543,16 @@ Icons.admin_panel_settings,
 color: Colors.pink,
 ),
 ),
-title: const Text(
-'مريم جبايلية',
-style: TextStyle(
+title: Text(
+_directorUser?.fullName ?? 'لا يوجد حساب مديرة',
+style: const TextStyle(
 fontWeight: FontWeight.bold,
 ),
 ),
-subtitle: const Text(
-'اسم المستخدم: mariam\nصلاحية كاملة لإدارة الروضة',
+subtitle: Text(
+_directorUser != null
+? 'اسم المستخدم: ${_directorUser!.username}\nصلاحية كاملة لإدارة الروضة'
+: '',
 ),
 isThreeLine: true,
 ),
@@ -406,21 +566,11 @@ fontWeight: FontWeight.bold,
 ),
 ),
 const SizedBox(height: 10),
-..._sectionAccounts.map(_sectionCard),
+..._teacherUsers.map(_sectionCard),
 const SizedBox(height: 20),
 ],
 ),
 ),
 );
 }
-}
-
-class _SectionAccount {
-final String section;
-final String username;
-
-const _SectionAccount({
-required this.section,
-required this.username,
-});
 }

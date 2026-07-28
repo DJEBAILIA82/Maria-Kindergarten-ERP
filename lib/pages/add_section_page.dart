@@ -178,7 +178,8 @@ class _AddSectionPageState extends State<AddSectionPage> {
                 requiredField: true,
               ),
               DropdownButtonFormField<String>(
-                value: _status,
+                key: ValueKey(_status),
+                initialValue: _status,
                 decoration: const InputDecoration(
                   labelText: 'الحالة',
                   prefixIcon: Icon(Icons.info_outline),

@@ -446,7 +446,8 @@ class _AddChildPageState extends State<AddChildPage> {
                 requiredField: true,
               ),
               DropdownButtonFormField<String>(
-                value: _gender,
+                key: ValueKey(_gender),
+                initialValue: _gender,
                 decoration: const InputDecoration(
                   labelText: 'الجنس',
                   prefixIcon: Icon(Icons.person),
@@ -530,7 +531,8 @@ class _AddChildPageState extends State<AddChildPage> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _transport,
+                key: ValueKey(_transport),
+                initialValue: _transport,
                 decoration: const InputDecoration(
                   labelText: 'النقل المدرسي',
                   prefixIcon: Icon(Icons.directions_bus),

@@ -72,28 +72,41 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   String _loginType = 'teacher';
-  String _selectedSection = 'الرضع';
+  String? _selectedTeacherUsername;
 
   bool _isLoading = false;
   bool _hidePassword = true;
   bool _rememberPassword = false;
 
-  String get _username {
+  List<AppUser> get _teacherAccounts {
+    return _userService
+        .getAllUsers()
+        .where((user) => user.role == UserRole.teacher)
+        .toList();
+  }
+
+  AppUser? get _directorAccount {
+    for (final user in _userService.getAllUsers()) {
+      if (user.role == UserRole.director) return user;
+    }
+    return null;
+  }
+
+  String? get _username {
     if (_loginType == 'director') {
-      return 'mariam';
+      return _directorAccount?.username;
     }
 
-    switch (_selectedSection) {
-      case 'الرضع':
-        return 'الرضع';
-      case 'قبل التمهيدي':
-        return 'قبل التمهيدي';
-      case 'التمهيدي':
-        return 'التمهيدي';
-      case 'التحضيري':
-        return 'التحضيري';
-      default:
-        return 'الرضع';
+    return _selectedTeacherUsername;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    final teachers = _teacherAccounts;
+    if (teachers.isNotEmpty) {
+      _selectedTeacherUsername = teachers.first.username;
     }
   }
 
@@ -105,6 +118,16 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     final password = _passwordController.text.trim();
+    final username = _username;
+
+    if (username == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('لا يوجد حساب متاح لتسجيل الدخول'),
+        ),
+      );
+      return;
+    }
 
     if (password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -119,11 +142,10 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
-    debugPrint("LOGIN USERNAME = $_username");
-    debugPrint("LOGIN PASSWORD = $password");
+    debugPrint("LOGIN USERNAME = $username");
 
     final AppUser? user = await _userService.login(
-      username: _username,
+      username: username,
       password: password,
     );
 
@@ -214,35 +236,30 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 20),
                       if (!isDirectorLogin)
                         DropdownButtonFormField<String>(
-                          value: _selectedSection,
+                          key: ValueKey(_selectedTeacherUsername),
+                          initialValue: _selectedTeacherUsername,
                           decoration: const InputDecoration(
                             labelText: 'اختر القسم',
                             prefixIcon: Icon(Icons.groups),
                             border: OutlineInputBorder(),
                           ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'الرضع',
-                              child: Text('قسم الرضع'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'قبل التمهيدي',
-                              child: Text('قسم قبل التمهيدي'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'التمهيدي',
-                              child: Text('قسم التمهيدي'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'التحضيري',
-                              child: Text('قسم التحضيري'),
-                            ),
-                          ],
+                          items: _teacherAccounts
+                              .map(
+                                (teacher) => DropdownMenuItem<String>(
+                                  value: teacher.username,
+                                  child: Text(
+                                    teacher.section.isNotEmpty
+                                        ? 'قسم ${teacher.section}'
+                                        : teacher.fullName,
+                                  ),
+                                ),
+                              )
+                              .toList(),
                           onChanged: (value) {
                             if (value == null) return;
 
                             setState(() {
-                              _selectedSection = value;
+                              _selectedTeacherUsername = value;
                               _passwordController.clear();
                             });
                           },
@@ -295,8 +312,8 @@ class _LoginPageState extends State<LoginPage> {
                             Expanded(
                               child: Text(
                                 isDirectorLogin
-                                    ? 'اسم المستخدم: mariam'
-                                    : 'القسم المختار: $_selectedSection',
+                                    ? 'اسم المستخدم: ${_directorAccount?.username ?? '-'}'
+                                    : 'القسم المختار: ${_selectedTeacherUsername ?? '-'}',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,

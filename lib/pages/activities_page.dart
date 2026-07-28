@@ -121,7 +121,8 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: selectedTitle,
+                      key: ValueKey(selectedTitle),
+                      initialValue: selectedTitle,
                       decoration: const InputDecoration(
                         labelText: "اسم النشاط",
                       ),
@@ -157,7 +158,8 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: selectedSection,
+                      key: ValueKey(selectedSection),
+                      initialValue: selectedSection,
                       decoration: const InputDecoration(
                         labelText: "القسم",
                       ),

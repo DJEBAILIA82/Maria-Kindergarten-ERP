@@ -220,7 +220,8 @@ class _UploadPhotoPageState extends State<UploadPhotoPage> {
               SizedBox(height: AppTheme.spaceMd),
               if (_isDirector)
                 DropdownButtonFormField<String>(
-                  value: _selectedSection,
+                  key: ValueKey(_selectedSection),
+                  initialValue: _selectedSection,
                   decoration: const InputDecoration(
                     labelText: 'القسم',
                     prefixIcon: Icon(Icons.groups),

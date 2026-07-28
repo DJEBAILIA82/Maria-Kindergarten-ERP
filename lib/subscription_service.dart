@@ -146,6 +146,31 @@ return int.tryParse(value?.toString() ?? '') ?? 0;
 
 }
 
+/// عدد الاشتراكات "المتأخرة" لشهر مُعيّن: اشتراك مسجَّل فعليًا
+/// (له صف في الجدول) ومبلغه المتبقي أكبر من صفر — نفس التعريف
+/// المستخدم في late_subscriptions_page.dart (لا يشمل الأطفال الذين
+/// لا يوجد لهم اشتراك مسجَّل أصلاً لهذا الشهر؛ تلك فئة منفصلة).
+Future<int> getLateSubscriptionsCount(String subscriptionMonth) async {
+final db = await _dbHelper.database;
+
+final result = await db.rawQuery(
+  '''
+  SELECT COUNT(*) AS total
+  FROM subscriptions
+  WHERE subscriptionMonth = ?
+    AND remainingAmount > 0
+  ''',
+  [subscriptionMonth],
+);
+
+final value = result.first['total'];
+
+if (value is int) return value;
+if (value is num) return value.toInt();
+
+return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
 Future<void> deleteSubscription({
 required String childId,
 required String subscriptionMonth,

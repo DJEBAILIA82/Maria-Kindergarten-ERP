@@ -1,5 +1,5 @@
-import '../database/database_helper.dart';
-import '../models/child.dart';
+import 'database/database_helper.dart';
+import 'models/child.dart';
 
 class ChildService {
   final dbHelper = DatabaseHelper.instance;

@@ -526,15 +526,7 @@ class _MessagesPageState extends State<MessagesPage> {
             ),
             Radio<String>(
               value: value,
-              groupValue: _sendMode,
               activeColor: color,
-              onChanged: (newValue) {
-                if (newValue == null) return;
-
-                setState(() {
-                  _sendMode = newValue;
-                });
-              },
             ),
           ],
         ),
@@ -556,7 +548,8 @@ class _MessagesPageState extends State<MessagesPage> {
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: _selectedChildId.isEmpty ? null : _selectedChildId,
+            key: ValueKey(_selectedChildId),
+            initialValue: _selectedChildId.isEmpty ? null : _selectedChildId,
             decoration: const InputDecoration(
               labelText: 'اختر الطفل',
               border: OutlineInputBorder(),
@@ -594,7 +587,8 @@ class _MessagesPageState extends State<MessagesPage> {
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: _selectedSection.isEmpty ? null : _selectedSection,
+            key: ValueKey(_selectedSection),
+            initialValue: _selectedSection.isEmpty ? null : _selectedSection,
             decoration: const InputDecoration(
               labelText: 'اختر القسم',
               border: OutlineInputBorder(),
@@ -791,28 +785,41 @@ class _MessagesPageState extends State<MessagesPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _sendModeCard(
-                    value: 'child',
-                    icon: Icons.child_care,
-                    title: 'طفل محدد',
-                    subtitle: 'فتح واتساب لولي طفل واحد',
-                    color: Colors.blue,
-                  ),
-                  const SizedBox(height: 8),
-                  _sendModeCard(
-                    value: 'section',
-                    icon: Icons.groups,
-                    title: 'قسم محدد',
-                    subtitle: 'إرسال منظم لأولياء قسم واحد',
-                    color: Colors.deepPurple,
-                  ),
-                  const SizedBox(height: 8),
-                  _sendModeCard(
-                    value: 'all',
-                    icon: Icons.groups_2,
-                    title: 'جميع الأولياء',
-                    subtitle: 'إرسال منظم لجميع الأرقام المسجلة',
-                    color: Colors.orange,
+                  RadioGroup<String>(
+                    groupValue: _sendMode,
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() {
+                        _sendMode = value;
+                      });
+                    },
+                    child: Column(
+                      children: [
+                        _sendModeCard(
+                          value: 'child',
+                          icon: Icons.child_care,
+                          title: 'طفل محدد',
+                          subtitle: 'فتح واتساب لولي طفل واحد',
+                          color: Colors.blue,
+                        ),
+                        const SizedBox(height: 8),
+                        _sendModeCard(
+                          value: 'section',
+                          icon: Icons.groups,
+                          title: 'قسم محدد',
+                          subtitle: 'إرسال منظم لأولياء قسم واحد',
+                          color: Colors.deepPurple,
+                        ),
+                        const SizedBox(height: 8),
+                        _sendModeCard(
+                          value: 'all',
+                          icon: Icons.groups_2,
+                          title: 'جميع الأولياء',
+                          subtitle: 'إرسال منظم لجميع الأرقام المسجلة',
+                          color: Colors.orange,
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 18),
                   _buildRecipientSelector(),

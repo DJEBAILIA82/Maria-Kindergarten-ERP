@@ -168,7 +168,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         DropdownButtonFormField<String>(
-                          value: category,
+                          key: ValueKey(category),
+                          initialValue: category,
                           decoration: const InputDecoration(
                             labelText: 'نوع المصروف',
                             border: OutlineInputBorder(),
@@ -292,6 +293,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
                         amountController.text.replaceAll(',', '.'),
                       );
 
+                      final messenger = ScaffoldMessenger.of(context);
+
                       try {
                         if (isEditing) {
                           await _expenseService.updateExpense(
@@ -312,11 +315,13 @@ class _ExpensesPageState extends State<ExpensesPage> {
                           );
                         }
 
-                        if (!mounted) return;
+                        if (!dialogContext.mounted) return;
 
                         Navigator.pop(dialogContext);
 
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        if (!mounted) return;
+
+                        messenger.showSnackBar(
                           SnackBar(
                             content: Text(
                               isEditing
@@ -330,7 +335,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
                       } catch (error) {
                         if (!mounted) return;
 
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        messenger.showSnackBar(
                           SnackBar(
                             content: Text('حدث خطأ أثناء الحفظ: $error'),
                           ),
@@ -353,6 +358,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
   }
 
   Future<void> _deleteExpense(Map<String, dynamic> expense) async {
+    final messenger = ScaffoldMessenger.of(context);
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -393,7 +400,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('تم حذف المصروف'),
         ),
@@ -403,7 +410,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
     } catch (error) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text('تعذر حذف المصروف: $error'),
         ),

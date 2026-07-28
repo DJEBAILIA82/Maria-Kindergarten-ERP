@@ -34,6 +34,19 @@ class AppTheme {
   static const Color avatarGirlBackground = Color(0xFFFFE0EC);
 
   // ---------------------------------------------------------------------
+  // ألوان دلالية للوحة القيادة الاحترافية (Dashboard v2)
+  // تُضاف كثوابت جديدة فقط، دون تعديل أو حذف أي ثابت قائم أعلاه،
+  // لأن statTotal/statPresent/statAbsent/statLate مستخدمة فعلياً في
+  // children_page.dart وpending_photos_page.dart ولا يجوز المساس بها.
+  // ---------------------------------------------------------------------
+  static const Color alertPending = Color(0xFFE07A3F); // برتقالي — صور معلقة
+  static const Color alertUrgent = Color(0xFFD64545); // أحمر — اشتراكات متأخرة
+  static const Color attendanceBlue = Color(0xFF3E7CB1); // أزرق — حضور اليوم
+  static const Color financeRevenue = Color(0xFF2FBFA6); // فيروزي — إيرادات
+  static const Color financeExpense = Color(0xFFD98C3D); // برتقالي غامق — مصروفات
+  static const Color financeProfit = Color(0xFF2FA86A); // أخضر — أرباح
+
+  // ---------------------------------------------------------------------
   // المسافات (Spacing Scale)
   // ---------------------------------------------------------------------
   static const double spaceXs = 4;

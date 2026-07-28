@@ -489,7 +489,8 @@ class _AttendancePageState extends State<AttendancePage> {
                               const SizedBox(height: 10),
                               if (_isDirector)
                                 DropdownButtonFormField<String>(
-                                  value: _selectedSection,
+                                  key: ValueKey(_selectedSection),
+                                  initialValue: _selectedSection,
                                   decoration: const InputDecoration(
                                     labelText: 'القسم',
                                     border: OutlineInputBorder(),

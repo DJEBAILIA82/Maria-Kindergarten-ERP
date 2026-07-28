@@ -298,7 +298,8 @@ class _ChildrenPageState extends State<ChildrenPage> {
 
   Widget _sectionFilterDropdown() {
     return DropdownButtonFormField<String>(
-      value: _selectedSection,
+      key: ValueKey(_selectedSection),
+      initialValue: _selectedSection,
       decoration: InputDecoration(
         labelText: 'تصفية حسب القسم',
         filled: true,

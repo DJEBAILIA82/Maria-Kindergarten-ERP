@@ -14,7 +14,6 @@ import 'messages_page.dart';
 import 'sections_page.dart';
 import 'subscriptions_page.dart';
 import '../main.dart';
-import 'settings_page.dart';
 import 'activities_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -41,10 +40,6 @@ class _HomePageState extends State<HomePage> {
 
   double _monthlyIncome = 0;
   double _monthlyExpenses = 0;
-
-  Map<String, int> _attendanceBySection = {};
-  int _lateSubscriptions = 0;
-  int _unregisteredChildren = 0;
 
   bool _isLoading = true;
 
@@ -95,9 +90,6 @@ class _HomePageState extends State<HomePage> {
       int present = 0;
       int absent = 0;
 
-      final Map<String, int> attendanceBySection = {};
-      int unregisteredChildren = 0;
-
       for (final child in children) {
         final status = attendance[child.id];
 
@@ -105,21 +97,11 @@ class _HomePageState extends State<HomePage> {
           present++;
         } else if (status == 'غائب') {
           absent++;
-        } else {
-          unregisteredChildren++;
-        }
-
-        final section = child.section.trim();
-
-        if (status == 'حاضر') {
-          attendanceBySection[section] =
-              (attendanceBySection[section] ?? 0) + 1;
         }
       }
 
       double income = 0;
       double expenses = 0;
-      int lateSubscriptions = 0;
 
       if (_isDirector) {
         final subscriptions =
@@ -137,12 +119,6 @@ class _HomePageState extends State<HomePage> {
           if (paidAmount is num) {
             income += paidAmount.toDouble();
           }
-
-          final remaining = subscription['remainingAmount'];
-
-          if (remaining is num && remaining > 0) {
-            lateSubscriptions++;
-          }
         }
       }
 
@@ -154,9 +130,6 @@ class _HomePageState extends State<HomePage> {
         _absentChildren = absent;
         _monthlyIncome = income;
         _monthlyExpenses = expenses;
-        _attendanceBySection = attendanceBySection;
-        _lateSubscriptions = lateSubscriptions;
-        _unregisteredChildren = unregisteredChildren;
         _isLoading = false;
       });
     } catch (_) {
@@ -168,9 +141,6 @@ class _HomePageState extends State<HomePage> {
         _absentChildren = 0;
         _monthlyIncome = 0;
         _monthlyExpenses = 0;
-        _attendanceBySection = {};
-        _lateSubscriptions = 0;
-        _unregisteredChildren = 0;
         _isLoading = false;
       });
     }
@@ -328,49 +298,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _quickInfoCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-  }) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: color.withOpacity(0.15),
-              child: Icon(
-                icon,
-                color: color,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 20,
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
         ),
       ),
     );

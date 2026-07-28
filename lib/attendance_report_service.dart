@@ -77,4 +77,20 @@ class AttendanceReportService {
       );
     }).toList();
   }
+
+  /// قاعدة العمل: "غياب متكرر" = عدد أيام الغياب المسجّلة خلال الشهر
+  /// أكبر من أو يساوي [minAbsentDays] (افتراضيًا 3). تعيش هذه القاعدة هنا
+  /// لأن AttendanceReportService هو المالك المنطقي لبيانات الحضور/الغياب،
+  /// وتُبنى فوق getMonthlyReport الموجودة أصلاً دون أي استعلام SQL جديد.
+  Future<List<ChildAttendanceReport>> getFrequentAbsentees({
+    required int year,
+    required int month,
+    int minAbsentDays = 3,
+  }) async {
+    final report = await getMonthlyReport(year: year, month: month);
+
+    return report
+        .where((entry) => entry.absentDays >= minAbsentDays)
+        .toList();
+  }
 }

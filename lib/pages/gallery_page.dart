@@ -256,7 +256,8 @@ class _GalleryPageState extends State<GalleryPage> {
                   padding: EdgeInsets.all(AppTheme.spaceLg),
                   children: [
                     DropdownButtonFormField<String>(
-                      value: _selectedSection,
+                      key: ValueKey(_selectedSection),
+                      initialValue: _selectedSection,
                       decoration: InputDecoration(
                         labelText: 'تصفية حسب القسم',
                         filled: true,

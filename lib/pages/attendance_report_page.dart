@@ -359,7 +359,8 @@ final visibleReports = widget.user.isDirector
                     const SizedBox(height: 10),
                    if (widget.user.isDirector)
   DropdownButtonFormField<String>(
-    value: _selectedSection,
+    key: ValueKey(_selectedSection),
+    initialValue: _selectedSection,
     decoration: const InputDecoration(
       labelText: 'فلترة حسب القسم',
       prefixIcon: Icon(Icons.groups),
