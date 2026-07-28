@@ -43,3 +43,17 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+# Generated Flutter folders
+ios/Flutter/ephemeral/
+macos/Flutter/ephemeral/
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+
+# Android cache
+android/.gradle/
+
+# Temporary upload folders
+.tmp.driveupload/
+
+# Claude temporary archives (if any)
+*.zip
